@@ -1,6 +1,7 @@
 #ifndef BLAZE_TYPE_H
 #define BLAZE_TYPE_H
 
+#include <cstdint>
 #include <vector>
 #include <map>
 #include "galois/Bag.h"
@@ -33,7 +34,12 @@ struct IoItem {
     PAGEID  page;
     int     num;
     char*   buf;
-    IoItem(int d, PAGEID p, int n, char* b): disk_id(d), page(p), num(n), buf(b) {}
+    bool    hit;
+    struct hitchhiker*   _hit_buf;
+    uint64_t*   pages_id;
+    IoItem(int d, PAGEID p, int n, char* b, bool h, struct hitchhiker* c, uint64_t* i): disk_id(d), page(p), num(n), 
+                                                                 buf(b), hit(h), _hit_buf(c), pages_id(i) {}
+    IoItem(int d, PAGEID p, int n, char* b, bool h): disk_id(d), page(p), num(n), buf(b),hit(h) {}
 };
 
 using PageReadList = std::vector<std::pair<PAGEID, char *>>;
@@ -43,6 +49,8 @@ using Mutex = galois::substrate::SimpleLock;
 typedef uint32_t FLAGS;
 const FLAGS no_output           = 0x01;
 const FLAGS prop_blocking       = 0x10;
+//zhengxd: hitchhike flag
+const FLAGS hit                = 0x01;
 
 inline bool should_output(const FLAGS& flags) {
     return !(flags & no_output);
@@ -52,6 +60,9 @@ inline bool use_prop_blocking(const FLAGS& flags) {
     return flags & prop_blocking;
 }
 
+inline bool is_hitchhike(const FLAGS& flags) {
+    return flags & hit;
+}
 enum ComputeWorkerRole { NORMAL, BIN, ACCUMULATE };
 
 #endif // BLAZE_TYPES_H

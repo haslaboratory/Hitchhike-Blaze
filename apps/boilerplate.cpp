@@ -13,9 +13,21 @@ cll::opt<int>
 
 cll::opt<unsigned int>
     ioBufferSize("ioBufferSize",
-                    cll::desc("IO buffer space size in MB (default: 256)"),
-                    cll::init(64));
-
+                    cll::desc("IO buffer space size in MB (default: 1024)"),
+                    cll::init(1024));
+cll::opt<unsigned int>
+    hitchhike("hit",
+                    cll::desc("use hitchhike ibaio syscall) (default: 0)"),
+                    cll::init(0));
+cll::opt<unsigned int>
+    queueDepth("queueDepth",
+                    cll::desc("AIO Queue Depth (default: 128)"),
+                    cll::init(128));
+cll::opt<unsigned int>
+    hitSize("hitSize",
+                    cll::desc("Hitchhike size in KB (default: 32)"),
+                    cll::init(32));
+                
 cll::opt<std::string>
     outIndexFilename(cll::Positional, cll::desc("<out index file>"), cll::Required);
 

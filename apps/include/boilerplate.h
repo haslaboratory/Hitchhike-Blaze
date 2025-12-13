@@ -5,6 +5,9 @@
 #include "Bin.h"
 
 extern llvm::cl::opt<int> numComputeThreads;
+extern llvm::cl::opt<unsigned int> hitchhike;
+extern llvm::cl::opt<unsigned int> queueDepth;
+extern llvm::cl::opt<unsigned int> hitSize;
 extern llvm::cl::opt<unsigned int> ioBufferSize;
 extern llvm::cl::opt<std::string> outIndexFilename;
 extern llvm::cl::list<std::string> outAdjFilenames;

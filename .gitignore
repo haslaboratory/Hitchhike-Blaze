@@ -1,1 +1,8 @@
-build
+
+*.json
+*.pdf
+# 忽略 build 文件夹
+build/
+.cache/
+/test/
+/scripts/result/

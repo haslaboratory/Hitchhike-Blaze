@@ -65,6 +65,10 @@ class Bitmap {
         start_[word_offset(pos)] |= ((uint64_t) 1l << bit_offset(pos));
     }
 
+    void reset_bit(size_t pos) {
+        start_[word_offset(pos)] &= ~((uint64_t) 1l << bit_offset(pos));
+    }
+
     void set_bit_atomic(size_t pos) {
         uint64_t old_val, new_val;
         do {

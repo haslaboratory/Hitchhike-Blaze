@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
     time.start();
 
     while (!frontier->empty()) {
-        Worklist<VID>* output = edgeMap(outGraph, frontier, BFS_F(parents, bins), prop_blocking);
+        Worklist<VID>* output = edgeMap(outGraph, frontier, BFS_F(parents, bins), prop_blocking, hitchhike);
         delete frontier;
         frontier = output;
     }

@@ -9,8 +9,12 @@
 #include "Type.h"
 #include "Util.h"
 #include "Param.h"
+#include "helpers.h"
 
 namespace blaze {
+
+//zhengxd: linux6.5-hitchhike syscall
+#define __NR_io_submit_hit 452
 
 static int io_setup(unsigned nr, aio_context_t *ctxp) {
     return syscall(__NR_io_setup, nr, ctxp);
@@ -18,6 +22,11 @@ static int io_setup(unsigned nr, aio_context_t *ctxp) {
 
 static int io_submit(aio_context_t ctx, long nr, struct iocb **iocbpp) {
     return syscall(__NR_io_submit, ctx, nr, iocbpp);
+}
+
+static int io_submit_hit(aio_context_t ctx, long nr, struct iocb **iocbpp, 
+                                    struct hitchhiker **hit_bufs) {
+    return syscall(__NR_io_submit_hit, ctx, nr, iocbpp, hit_bufs);
 }
 
 static int io_getevents(aio_context_t ctx, long min_nr, long max_nr,

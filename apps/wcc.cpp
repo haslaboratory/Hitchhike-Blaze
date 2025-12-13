@@ -127,9 +127,9 @@ int main(int argc, char **argv) {
 	time.start();
 
 	while (!active->empty()) {
-		edgeMap(outGraph, active, WCC_F(ids, bins), no_output | prop_blocking);
+		edgeMap(outGraph, active, WCC_F(ids, bins), no_output | prop_blocking, hitchhike);
         bins->reset();
-		edgeMap(inGraph, active, WCC_F(ids, bins), no_output | prop_blocking);
+		edgeMap(inGraph, active, WCC_F(ids, bins), no_output | prop_blocking, hitchhike);
         bins->reset();
 		Worklist<VID>* output = vertexFilter(outGraph, WCC_Shortcut(ids, prev_ids));
 		delete active;

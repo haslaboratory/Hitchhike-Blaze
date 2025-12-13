@@ -1,13 +1,17 @@
 #ifndef BLAZE_BINNING_WORKER_H
 #define BLAZE_BINNING_WORKER_H
 
+#include <cstdint>
+#include <linux/aio_abi.h>
 #include <string>
 #include "Type.h"
+#include "hit_types.h"
 #include "galois/Bag.h"
 #include "Synchronization.h"
 #include "Queue.h"
 #include "Param.h"
 #include "Bin.h"
+#include "helpers.h"
 
 namespace blaze {
 
@@ -107,11 +111,11 @@ class ScatterWorker {
         }
 
         VID* edges = (VID*)(buffer + offset_in_buf);
-
         for (uint32_t i = 0; i < degree; i++) {
             VID dst = edges[i];
-            if (func.cond(dst))
+            if (func.cond(dst)){
                 _bins->append(_id, dst, func.scatter(vid, dst));
+            }
         }
 
         return true;
@@ -128,9 +132,37 @@ class ScatterWorker {
             ppid_start++;
             buffer += PAGE_SIZE;
         }
-        _num_processed_pages += item.num;
+        // zhengxd: process hitchhiker pages
+        if(item.hit){
+            struct hitchhiker* hit = (struct hitchhiker*) item._hit_buf;
+            uint64_t* pages_id = (uint64_t*) item.pages_id;
+            uint64_t index = 0;
+            while( hit->in_use && index <= hit->max){
+
+                ppid_start = pages_id[index];
+                //zhengxd: size always == 4096( 1 page)
+                const PAGEID ppid_end_hit  = ppid_start + 1;
+                
+                while (ppid_start < ppid_end_hit) {
+                    const PAGEID pid = ppid_start * _num_disks + item.disk_id;
+                    processFetchedPage(graph, func, pid, buffer);
+                    ppid_start++;
+                    buffer += PAGE_SIZE;
+                }
+                index++;
+            }
+        }
+        if(item.hit){
+            struct hitchhiker* hit = (struct hitchhiker*) item._hit_buf;
+            sync.add_num_free_pages(item.disk_id, (hit->max + 2));
+            _num_processed_pages += (hit->max + 2);
+            free(item._hit_buf);
+            free(item.pages_id);
+        } else {
+            sync.add_num_free_pages(item.disk_id, item.num);
+            _num_processed_pages += item.num;
+        }
         free(item.buf);
-        sync.add_num_free_pages(item.disk_id, item.num);
     }
 
     template <typename Gr, typename Func>

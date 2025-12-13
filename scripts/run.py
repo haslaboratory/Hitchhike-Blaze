@@ -8,6 +8,7 @@ import argparse
 BLAZE_BINARY_PATH = "../build/bin"
 
 def exec_cmd(cmd, ignore_exception=False, dry=False):
+    print(cmd)
     if dry:
         print(cmd)
         return None
@@ -29,7 +30,8 @@ def get_index_file_name(disks, dataset, data_format):
     return "{0}/{1}.{2}.index".format(disks[0], dataset, data_format)
 
 def get_adj_file_names(disks, dataset, data_format):
-    return ["{0}/{1}.{2}.adj.{3}.{4}".format(disk, dataset, data_format, len(disks), i) for i, disk in enumerate(disks)]
+    # return ["{0}/{1}.{2}.adj.{3}.{4}".format(disk, dataset, data_format, len(disks), i) for i, disk in enumerate(disks)]
+    return ["{0}/{1}.{2}.adj.{4}".format(disk, dataset, data_format, len(disks), i) for i, disk in enumerate(disks)]
 
 def build_command(args, data_format):
     cmd = BLAZE_BINARY_PATH + "/" + args.kernel
@@ -60,8 +62,10 @@ def get_read_bytes_from_iostat(filename):
         for line in lines:
             words = line.split()
             if not words: continue
-            if words[0] == 'nvme0n1':
-                return int(words[4])
+            # zhengxd: change nvme disk info
+            if words[0] == 'nvme7c7n1':
+                # read is 2
+                return int(words[2])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arguments for running FastGraph")
@@ -134,7 +138,8 @@ if __name__ == "__main__":
     else:
         b = int(threads * bin_ratio)
         a = threads - b
-        result_file = f'{path}/{dataset}_{data_format}_{threads}_{num_disks}__{bin_count}_{b}_{a}__{bin_size}.txt'
+        # result_file = f'{path}/{dataset}_{data_format}_{threads}_{num_disks}__{bin_count}_{b}_{a}__{bin_size}.txt'
+        result_file = f'{path}/{dataset}_{data_format}_{threads}.txt'
 
     if not args.force and os.path.exists(result_file):
         print(f'{result_file} exists.')
@@ -150,29 +155,29 @@ if __name__ == "__main__":
         print(cmd)
         sys.exit()
 
-    iostat_beg = 'iostat_beg.txt'
-    iostat_end = 'iostat_end.txt'
+    # iostat_beg = 'iostat_beg.txt'
+    # iostat_end = 'iostat_end.txt'
 
     # Collect IO stat
-    exec_cmd(f'iostat > {iostat_beg}')
+    # exec_cmd(f'iostat > {iostat_beg}')
 
     # Collect IO stat log
-    os.system(f'iostat -m -d 1 > {result_file}.iostat &')
+    # os.system(f'iostat -m -d 1 > {result_file}.iostat &')
 
     # Run workload
     exec_cmd(cmd)
 
     # Kill IO stat logging
-    exec_cmd(f'killall iostat')
+    # exec_cmd(f'killall iostat')
 
     # Collect IO stat
-    exec_cmd(f'iostat > {iostat_end}')
+    # exec_cmd(f'iostat > {iostat_end}')
 
     # Collect IO stat
-    beg = get_read_bytes_from_iostat(iostat_beg)
-    end = get_read_bytes_from_iostat(iostat_end)
-    bytes_read = (end - beg) * 1024
-    cmd = f'echo "Bytes read: {bytes_read}" >> {result_file}'
-    exec_cmd(cmd)
-    exec_cmd(f'rm {iostat_beg}')
-    exec_cmd(f'rm {iostat_end}')
+    # beg = get_read_bytes_from_iostat(iostat_beg)
+    # end = get_read_bytes_from_iostat(iostat_end)
+    # bytes_read = (end - beg) * 1024
+    # cmd = f'echo "Bytes read: {bytes_read}" >> {result_file}'
+    # exec_cmd(cmd)
+    # exec_cmd(f'rm {iostat_beg}')
+    # exec_cmd(f'rm {iostat_end}')

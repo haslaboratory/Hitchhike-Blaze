@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
     long iter = 0;
 
     while (iter++ < maxIterations) {
-        edgeMap(outGraph, frontier, PR_F(outGraph, data, bins), no_output | prop_blocking);
+        edgeMap(outGraph, frontier, PR_F(outGraph, data, bins), no_output | prop_blocking,hitchhike);
         Worklist<VID>* active = (iter == 1) ?
                                 vertexFilter(outGraph, PR_VertexApply_FirstRound(data, damping, one_over_n, epsilon)) :
                                 vertexFilter(outGraph, PR_VertexApply(data, damping, epsilon));

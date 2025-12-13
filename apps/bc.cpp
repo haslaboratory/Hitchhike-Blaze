@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
     long round = 0;
     while (!frontier->empty()) {
         round++;
-        Worklist<VID>* output = edgeMap(outGraph, frontier, BC_F(num_paths, visited, bins), prop_blocking);
+        Worklist<VID>* output = edgeMap(outGraph, frontier, BC_F(num_paths, visited, bins), prop_blocking,hitchhike);
         vertexMap(output, BC_Vertex_F(visited));
         levels.push_back(output);
         frontier = output;
@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 
     // backward phase
     for (long r = round - 2; r >= 0; r--) {
-        edgeMap(inGraph, frontier, BC_Back_F(dependencies, visited, bins), no_output | prop_blocking);
+        edgeMap(inGraph, frontier, BC_Back_F(dependencies, visited, bins), no_output | prop_blocking,hitchhike);
         delete frontier;
         frontier = levels[r];
         vertexMap(frontier, BC_Back_Vertex_F(dependencies, inverse_num_paths, visited));
